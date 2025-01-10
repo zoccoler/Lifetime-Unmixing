@@ -14,13 +14,15 @@ from napari_flim_phasor_plotter._widget import make_flim_phasor_plot, manual_lab
 from utilities import ellipse_vertices, format_metadata, set_plot_zoom_position, add_segmentation_metadata
 import time
 import warnings
+from watermark import watermark
 warnings.filterwarnings("ignore")
-start_time = time.time()
-print("Napari version: ", napari.__version__)
+# Print package versions and machine info
+print(watermark(packages="numpy,pandas,napari,napari_flim_phasor_plotter,skimage,dask,pyclesperanto_prototype,tifffile,xmltodict", machine=True, python=True, gpu=True))
 
+start_time = time.time()
 # Inputs
 
-# Main folder path
+# Main folder path (each folder contains a zarr file and an xml file)
 main_folder_path = Path("/home/pol_haase/mazo260d/Data/I227_Lifetime_Unmixing_of_Dyes_with_Overlapping_Sprectra/Batch_Processing")
 
 # Additional metadata in case the xml file is not available
@@ -280,12 +282,16 @@ for folder in main_folder_path.iterdir():
         # Convert the segmentation result to a Dask array
         chunk_shape = summed_intensity_stack.chunksize
         cluster_labels_image_timelapse_dask = da.from_array(cluster_labels_image_timelapse_post_processed, chunks=chunk_shape)
-        # Add segmentation result to the summed intensity stack
-        summed_intensity_stack = da.concatenate([summed_intensity_stack, cluster_mask_timelapse_dask, cluster_labels_image_timelapse_dask], axis=0)
+        
         if store_phasor_mask:
             cluster_mask_timelapse = np.expand_dims(cluster_mask_timelapse.astype(summed_intensity_stack.dtype), axis=0)
             cluster_mask_timelapse_dask = da.from_array(cluster_mask_timelapse, chunks=chunk_shape)
             metadata_timelapse = add_segmentation_metadata(metadata_timelapse, channel_name='Phasor Mask')
+            # Add mask and segmentation result to the summed intensity stack
+            summed_intensity_stack = da.concatenate([summed_intensity_stack, cluster_mask_timelapse_dask, cluster_labels_image_timelapse_dask], axis=0)
+        else:
+            # Add segmentation result to the summed intensity stack
+            summed_intensity_stack = da.concatenate([summed_intensity_stack, cluster_labels_image_timelapse_dask], axis=0)
         # Add metadata to 'segmentation' channel(s): Phasor Mask and Segmentation results after post-processing
         metadata_timelapse = add_segmentation_metadata(metadata_timelapse)
         output_file_name = sample_name + '_summed_intensity_with_segmentation.ome.tif'
