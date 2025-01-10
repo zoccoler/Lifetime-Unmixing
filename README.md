@@ -5,7 +5,7 @@ Images are 6D (3D FLIM timelapse multichannel).
 
 ## Installation
 
-Install [Miniforge](https://github.com/conda-forge/miniforge?tab=readme-ov-file#miniforge) in your computer (which contains [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html#).
+Install [Miniforge](https://github.com/conda-forge/miniforge?tab=readme-ov-file#miniforge) in your computer (which contains [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html#)).
 
 Clone this repository locally (for example using [Github Desktop](https://desktop.github.com/)).
 
